@@ -33,7 +33,6 @@ Usage: bpm-tag [options] <file>
 Tag an audio file with tempo (in beats-per-minute, BPM)
 
   -f   Ignore existing BPM value
-  -r   Tag all files in folder and subfolders
   -n   Display BPM only, don't tag
   -m   Minimum detected BPM
   -x   Maximum detected BPM
@@ -43,8 +42,46 @@ See the bpm-tag(1) man page for more information and examples.
 END
 }
 
-doOne() 
-{
+# Parse command line arguments
+
+FORCE=false
+WRITE=true
+ARGS=""
+
+while getopts "fhnm:x:" OPT; do
+	case "$OPT" in
+	f)
+		FORCE=true
+		;;
+	n)
+		WRITE=false
+		;;
+	m)
+		ARGS="$ARGS -m $OPTARG"
+		;;
+	x)
+		ARGS="$ARGS -x $OPTARG"
+		;;
+	h)
+		usage
+		exit 0
+		;;
+	?)
+		exit 1
+	esac
+done
+shift $((OPTIND - 1))
+
+if [ -z "$1" ]; then
+	usage >&2
+	exit 1
+fi
+
+set -u
+
+FILE="$1"
+shift
+
 # Don't overwrite an existing BPM tag
 
 case "$FILE" in
@@ -59,13 +96,13 @@ case "$FILE" in
 	;;
 *)
 	echo "$FILE: file extension not known" >&2
-	return
+	exit 1
 	;;
 esac
 
 if [ -n "$BPM" ] && ! $FORCE; then
 	echo "$FILE: already tagged, $BPM BPM" >&2
-	return
+	exit 1
 fi
 
 # Analyse the BPM
@@ -98,60 +135,3 @@ case "$FILE" in
 	echo "$FILE: don't know how to tag this type of file" >&2
 	exit 1
 esac
-}
-
-# Parse command line arguments
-
-FORCE=false
-REDUNDANT=false
-WRITE=true
-ARGS=""
-
-while getopts "frhnm:x:" OPT; do
-	case "$OPT" in
-	f)
-		FORCE=true
-		;;
-	r)
-		REDUNDANT=true
-		;;
-	n)
-		WRITE=false
-		;;
-	m)
-		ARGS="$ARGS -m $OPTARG"
-		;;
-	x)
-		ARGS="$ARGS -x $OPTARG"
-		;;
-	h)
-		usage
-		exit 0
-		;;
-	?)
-		exit 1
-	esac
-done
-shift $((OPTIND - 1))
-
-if [ -z "$1" ] && ! $REDUNDANT; then
-	usage >&2
-	exit 1
-fi
-
-set -u
-
-if $REDUNDANT; then
-
-find . -type f -iregex ".*\(mp3\|ogg\|flac\)" -print0 | while read -d $'\0' FILE; do
-  #echo $FILE
-  doOne 
-done
-
-else
-	FILE="$1"
-	shift
-	doOne
-fi
-
-

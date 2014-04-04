@@ -21,3 +21,6 @@ To change the target prefix, for example:
 The Makefile picks up additional variables from a .config file
 in the source directory. You will prefer to use this if you want
 to control build flags for testing and debugging.
+
+-----------------------------------------------------------------
+Added -r to tag whole folders

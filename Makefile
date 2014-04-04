@@ -24,6 +24,14 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL) -t $(DESTDIR)$(MANDIR)/man1 bpm.1 bpm-graph.1 bpm-tag.1
 
+uninstall:
+	rm $(DESTDIR)$(BINDIR)/bpm
+	rm $(DESTDIR)$(BINDIR)/bpm-graph
+	rm $(DESTDIR)$(BINDIR)/bpm-tag
+	rm $(DESTDIR)$(MANDIR)/man1/bpm.1
+	rm $(DESTDIR)$(MANDIR)/man1/bpm-graph.1
+	rm $(DESTDIR)$(MANDIR)/man1/bpm-tag.1
+
 dist:
 	mkdir -p dist
 	V=$$(git describe) && git archive --prefix=bpm-tools-$$V/ HEAD \
